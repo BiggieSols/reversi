@@ -10,7 +10,7 @@ class Reversi
   def initialize
     @board = Board.new
 
-    @player_1 = ComputerPlayer.new(:w, @board)
+    @player_1 = HumanPlayer.new(:w, board)#, @board)
     @player_2 = ComputerPlayer.new(:b, @board)
 
     @current_player = @player_1
@@ -28,33 +28,28 @@ class Reversi
     @board.render(curr_player_color)
     until @board.over?
       begin
-        # switch_player if no_current_moves?
+        # switch_player if no_current_moves
+        switch_player if @board.no_available_moves?(curr_player_color)
 
         input_coord = @current_player.get_input
-
-        break if input_coord == "exit"
-
-        input_coord = [input_coord[0], input_coord[1]]
+        break if input_coord == "exit"        
         @board.move(input_coord, curr_player_color)
-
       rescue ArgumentError, RuntimeError, InvalidMoveError => e
         puts e.message
         retry
       end
       switch_player
-      
       @board.render(curr_player_color, input_coord)
     end
-    @board.render
-
-    output_game_result
+    show_game_result
   end
 
   def no_current_moves?
     @board.no_available_moves?(curr_player_color)
   end
 
-  def output_game_result
+  def show_game_result
+    @board.render
     if ! @board.over?
       puts "exited game successfully"
     elsif @board.tied?

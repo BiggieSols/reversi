@@ -3,11 +3,6 @@ require_relative 'player'
 class ComputerPlayer < Player
   attr_reader :color, :board
 
-  def initialize(color, board)
-    super(color)
-    @board = board
-  end
-
   def get_best_move
     all_moves = @board.all_available_moves(@color)
     corners = available_corners(all_moves)

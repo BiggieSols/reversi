@@ -1,20 +1,15 @@
+class MethodUndefinedError < StandardError
+end
+
 class Player
   attr_reader :color
 
-  def initialize(color)
-    @color = color
+  def initialize(color, board)
+    @color, @board = color, board
   end
 
   def get_input
-    puts "#{player_name} see avialable moves above"
-    puts "please enter your move coordinates"
-    input = parse_input(gets.chomp)
-  end
-
-  def parse_input(input)
-    return "exit" if input == "exit"
-    raise "invalid input, must enter coord, coord" unless input =~ /^\s*[0-9],?\s*[0-9]\s*$/
-    input_arr = input.split(/,?\s*/).map(&:to_i)
+    raise MethodUndefinedError.new("method not defined for this class")
   end
 
   def player_name

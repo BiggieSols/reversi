@@ -81,11 +81,13 @@ class Board
     end
   end
 
-  def render(color = nil, last_move = nil)
-    # puts "beginning render"
-    avail_moves = all_available_moves(color)
-    # puts "found available moves"
+  def clear_screen
+    puts "\e[H\e[2J"
+  end
 
+  def render(color = nil, last_move = nil, pointer_position = nil)
+    clear_screen
+    avail_moves = all_available_moves(color)
 
     puts "  0 1 2 3 4 5 6 7"
     8.times do |row_index|
@@ -95,6 +97,7 @@ class Board
         background = ((row_index + col_index) % 2 == 0) ? :light_blue : :light_green
         background = :red if avail_moves.include?( [row_index, col_index] )
         background = :light_white if [row_index, col_index] == last_move
+        background = :black if [row_index, col_index] == pointer_position
         piece = self[row_index, col_index]
         to_print = piece.nil? ? "  " : piece.to_s
         print to_print.colorize(background: background)
