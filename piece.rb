@@ -24,18 +24,19 @@ class Piece
     avail_moves = []
 
     valid_offsets.each do |offset|      
-      # start by offsetting once
       new_pos = offset_pos(@position, offset)
 
       while true
-        puts
         new_pos = offset_pos(new_pos, offset)
+        
+        break unless in_bounds(new_pos)
 
         piece = @board[ new_pos[0], new_pos[1] ]
 
-        break unless in_bounds(new_pos)
         if piece.nil?
           avail_moves << new_pos
+          break
+        elsif piece.color == @color
           break
         end
       end
@@ -46,9 +47,8 @@ class Piece
   def valid_offsets
     offsets.select do |offset|
       new_pos = offset_pos(@position, offset)
+      next unless in_bounds(new_pos)
       piece = @board[ new_pos[0], new_pos[1] ]
-      # puts "#{piece} is at position #{new_pos}"
-
       !piece.nil? && piece.color != @color
     end
   end
@@ -64,12 +64,6 @@ class Piece
   end
 
   def offsets
-    [].tap do |arr|
-      (-1 .. 1).each do |row|
-        (-1.. 1).each do |col|
-          arr << [ row, col ]
-        end
-      end
-    end
+    [-1, 0, 1].product( [-1, 0, 1] )
   end
 end

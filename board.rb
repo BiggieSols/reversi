@@ -2,6 +2,8 @@
 require_relative 'piece'
 require 'colorize'
 
+class InvalidMoveError < StandardError
+end
 
 class Board
   def initialize
@@ -20,17 +22,26 @@ class Board
   def dup
     new_board = Board.new
     (all_pieces(:w) + all_pieces(:b)).each do |piece|
-      Piece.new(new_board, piece.position, piece.color)
+      position = piece.position
+      new_piece = Piece.new(new_board, position, piece.color)
+      new_board[position[0], position[1]] = new_piece
     end
     new_board
   end
 
   def move(new_coord, color)
-    raise "you can't go there!" unless all_available_moves(color).include?(new_coord)
+
+    unless all_available_moves(color).include?(new_coord)
+      raise InvalidMoveError.new("you can't go there!")
+    end
+
 
     new_piece = Piece.new(self, new_coord, color)
     add_piece(new_piece)
   end
+
+  # def winner
+  # end
 
   def add_piece(new_piece)
     color = new_piece.color
@@ -70,15 +81,20 @@ class Board
     end
   end
 
-  def render(color = nil)
+  def render(color = nil, last_move = nil)
+    # puts "beginning render"
     avail_moves = all_available_moves(color)
+    # puts "found available moves"
+
 
     puts "  0 1 2 3 4 5 6 7"
     8.times do |row_index|
       print "#{row_index} "
       8.times do |col_index|
+
         background = ((row_index + col_index) % 2 == 0) ? :light_blue : :light_green
         background = :red if avail_moves.include?( [row_index, col_index] )
+        background = :light_white if [row_index, col_index] == last_move
         piece = self[row_index, col_index]
         to_print = piece.nil? ? "  " : piece.to_s
         print to_print.colorize(background: background)
@@ -87,26 +103,54 @@ class Board
     end
   end
 
-  def over?(color)
-    all_available_moves(other_color(color)).empty?
+  def over?
+    no_available_moves? || out_of_pieces?
+  end
+
+  def tied?
+    num_pieces(:b) == num_pieces(:w)
+  end
+
+  def winner
+    return :b if num_pieces(:b) > num_pieces(:w)
+    :w
   end
 
   def other_color(color)
     color == :w ? :b : :w
   end
 
-  def all_available_moves(color)
+  def all_available_moves(player_color = nil)
+    colors = [:w, :b] if player_color == nil
+    colors = [player_color] if player_color != nil
+
+
     [].tap do |arr|
-      all_pieces(color).each do |piece|
-        piece.available_moves.each do |move|
-          arr << move
+      colors.each do |color|
+        all_pieces(color).each do |piece|
+          piece.available_moves.each do |move|
+            arr << move
+          end
         end
       end
     end
   end
 
+  def no_available_moves?(color = nil)
+    all_available_moves(color).empty?
+  end
+
   def all_pieces(color)
     @grid.flatten.compact.select { |piece| piece.color == color }
+  end
+
+  def num_pieces(color)
+    all_pieces(color).length
+  end
+
+  def out_of_pieces?(player_color = nil)
+    return (all_pieces(:w) + all_pieces(:b)).empty? if player_color == nil
+    all_pieces(:player_color).empty?
   end
 
   def [](row, col)
@@ -118,19 +162,3 @@ class Board
   end
 
 end
-
-# b = Board.new
-# p b.all_pieces(:w)
-
-# b.render(:w)
-
-# white_pieces = b.all_pieces(:w)
-# p "white positions are #{white_pieces.map(&:position)}"
-
-# b.add_piece(Piece.new(b, [4, 2], :w))
-# b.render(:w)
-
-# p "new available moves are #{b.all_available_moves(:w)}"
-# white_pieces = b.all_pieces(:w)
-# white_pieces = b.all_pieces(:w)
-# p "white positions are #{white_pieces.map(&:position)}"

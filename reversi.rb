@@ -1,4 +1,7 @@
 require_relative 'board'
+require_relative 'player'
+require_relative 'human_player'
+require_relative 'computer_player'
 
 class Reversi
 
@@ -6,49 +9,59 @@ class Reversi
 
   def initialize
     @board = Board.new
-    @player_color = :w
+
+    @player_1 = ComputerPlayer.new(:w, @board)
+    @player_2 = ComputerPlayer.new(:b, @board)
+
+    @current_player = @player_1
+  end
+
+  def curr_player_color
+    @current_player.color
   end
 
   def switch_player
-    @player_color = @board.other_color(@player_color)
+    @current_player = (@current_player == @player_1) ? @player_2 : @player_1
   end
 
   def play
-    until @board.over?(@player_color)
+    @board.render(curr_player_color)
+    until @board.over?
       begin
-        input_coord = get_input
+        # switch_player if no_current_moves?
+
+        input_coord = @current_player.get_input
 
         break if input_coord == "exit"
 
         input_coord = [input_coord[0], input_coord[1]]
-        @board.move(input_coord, @player_color)
-      rescue Exception => e
+        @board.move(input_coord, curr_player_color)
+
+      rescue ArgumentError, RuntimeError, InvalidMoveError => e
         puts e.message
         retry
       end
-
       switch_player
-
+      
+      @board.render(curr_player_color, input_coord)
     end
-    @board.render(@player_color)
-    puts "game over!"
+    @board.render
+
+    output_game_result
   end
 
-  def get_input
-    @board.render(@player_color)
-    puts "#{player_name} see avialable moves above"
-    puts "please enter your move coordinates"
-    input = parse_input(gets.chomp)
+  def no_current_moves?
+    @board.no_available_moves?(curr_player_color)
   end
 
-  def parse_input(input)
-    return "exit" if input == "exit"
-    raise "invalid input, must enter coord, coord" unless input =~ /^\s*[0-9],?\s*[0-9]\s*$/
-    input_arr = input.split(/,?\s*/).map(&:to_i)
-  end
-
-  def player_name
-    (@player_color == :w) ? "white player" : "black player"
+  def output_game_result
+    if ! @board.over?
+      puts "exited game successfully"
+    elsif @board.tied?
+      puts "it's a tie!"
+    else 
+      puts "#{@board.winner} won the game!"
+    end
   end
 end
 
