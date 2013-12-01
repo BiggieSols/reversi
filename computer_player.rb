@@ -21,7 +21,6 @@ class ComputerPlayer < Player
         best_move = move
       end
     end
-    puts "done testing dup board"
     best_move
   end
 

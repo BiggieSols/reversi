@@ -4,13 +4,12 @@ require_relative 'human_player'
 require_relative 'computer_player'
 
 class Reversi
-
   attr_accessor :board
 
   def initialize
     @board = Board.new
 
-    @player_1 = HumanPlayer.new(:w, board)#, @board)
+    @player_1 = HumanPlayer.new(:w, board)
     @player_2 = ComputerPlayer.new(:b, @board)
 
     @current_player = @player_1
@@ -28,7 +27,6 @@ class Reversi
     @board.render(curr_player_color)
     until @board.over?
       begin
-        # switch_player if no_current_moves
         switch_player if @board.no_available_moves?(curr_player_color)
 
         input_coord = @current_player.get_input
@@ -54,8 +52,9 @@ class Reversi
       puts "exited game successfully"
     elsif @board.tied?
       puts "it's a tie!"
-    else 
-      puts "#{@board.winner} won the game!"
+    else
+      winner = @board.winner == :w ? "White player" : "Black player"
+      puts "#{winner} won the game!"
     end
   end
 end
