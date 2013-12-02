@@ -59,5 +59,7 @@ class Reversi
   end
 end
 
-r = Reversi.new
-r.play
+if __FILE__ == $PROGRAM_NAME
+  r = Reversi.new
+  r.play
+end
