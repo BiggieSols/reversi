@@ -9,3 +9,5 @@ To play:
 * clone the repo
 * run ruby reversi.rb
 * use arrow keys to move select your move
+
+![Reverse_png](Reversi.png)
